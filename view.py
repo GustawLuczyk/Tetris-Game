@@ -15,11 +15,15 @@ def circle(a, b, c, d):
 	"""drawes circle"""
 	pygame.draw.circle(window, a, b, c, d)
 	
-def squares(color, poz, size, thi = 0):
+def squares(col, poz, size, thi = 0):
 	'''drawes rectangles'''
-	for rect in poz:
-		pygame.draw.rect(window, color, pygame.Rect(rect[0], rect[1], size, size), thi)
-
+	if col == 0:
+		for rect in poz:
+			pygame.draw.rect(window, rect[2], pygame.Rect(rect[0], rect[1], size, size), thi)
+	else:
+		for rect in poz:
+			pygame.draw.rect(window, col, pygame.Rect(rect[0], rect[1], size, size), thi)
+			
 def line(color = (0, 0, 0), xy1= (501, 0), xy2 = (501, 750), thickness = 3):
 	pygame.draw.line(window,color,xy1,xy2,thickness)
 

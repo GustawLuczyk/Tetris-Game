@@ -22,9 +22,9 @@ if __name__ == "__main__":
 					elif event.key == pygame.K_LEFT:
 						Manage.MoveLeft()
 					elif event.key == pygame.K_UP:
-						print('Nacisnąłeś UP')
+						Manage.Rotate()
 					elif event.key == pygame.K_DOWN:
-						print('Nacisnołeś DOWN')
+						Manage.FallFaster()
 					elif event.key == pygame.K_x:
 						pygame.quit()
 					elif event.key == pygame.K_a:
@@ -52,11 +52,10 @@ if __name__ == "__main__":
 			view.window.blit(surface, (500, 0))
 			b1 = view.button(view.window, (600, 100), "Stop")							
 			positions = Manage.GetPositions()						
-			view.squares((100, 90, 200), positions, 50)
-			view.squares((0, 0, 0), positions, 50, 2)
+			view.squares(0, positions, 50)
+			view.squares((0,0,0), positions, 50, 2)
 			view.line()
 			pygame.display.flip()
 			t1 = time.time()
-		
 		
 		
