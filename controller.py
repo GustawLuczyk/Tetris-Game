@@ -1,5 +1,5 @@
 import pygame, view, time, random
-from model import Manage
+from game_model import Manage
 pygame.init()
 view.window_generator()
 
