@@ -34,7 +34,8 @@ class Manager():
 		self.shape7 = [[(200, -100, 100), (50, 0), (50, 50), (0, 100), (50, 100)], [(200, -50, 150), (0, 0), (0, 50), (50, 50), (100, 50)],
 		[(200, -100, 100), (0, 0), (50, 0), (0, 50), (0, 100)], [(200, -50, 150), (0, 0), (50, 0), (100, 0), (100, 50)]] 
 		self.shapes = [self.shape1, self.shape2, self.shape3, self.shape4, self.shape5, self.shape6, self.shape7]	
-		self.colours = ((215,35,35), (255,179,26), (102,255,178), (76,153,0), (0,0,204), (153,0,76), (255,255,0))
+		self.colours = [(215,35,35), (255,179,26), (102,255,178), (76,153,0), (0,0,204), (153,0,76), (255,255,0)]
+		self.last_colour = (255,255,0)
 		
 		self.reference_coordinate_x = 0
 		self.reference_coordinate_y = 0
@@ -46,7 +47,11 @@ class Manager():
 		self.general_shape = random.choice(self.shapes)
 		self.shape = random.choice(self.general_shape)
 		self.shapes_index = self.general_shape.index(self.shape)
+		
+		self.colours.remove(self.last_colour)
 		self.colour = random.choice(self.colours)
+		self.colours.append(self.last_colour)
+		self.last_colour = self.colour
 				
 		for i in range(1, 5):
 			self.reference_coordinate_x = self.shape[0][0]
@@ -54,7 +59,6 @@ class Manager():
 			self.x = self.reference_coordinate_x + self.shape[i][0]
 			self.y = self.reference_coordinate_y + self.shape[i][1]
 			self.falling_objects.append(Brick(self.x, self.y, self.colour))
-		#	print(self.x, self.y)
 			
 	def AddToRow(self, obj):
 		"""adds an object to a proper row list"""
@@ -62,21 +66,21 @@ class Manager():
 
 	def RemoveRow(self):
 		"""removes full rows and orders objects located above the deleted rows to fall"""
-		add = 50		
-		for row in self.rows:
-			if len(row) == 10:
-				for i in range(10):
-					self.objects_list.remove(row[0])
-					del row[0]
-				if len(self.rows[self.rows.index(row) + 1]) == 10:
-					add = add + 50
-					continue
-				for row2 in self.rows[self.rows.index(row):]:
-					for obj in row2:
-						obj.y = obj.y + add
-						self.AddToRow(obj)
-					row2.clear()	
-							
+		repeat = True
+		while repeat:
+			repeat = False
+			for row in self.rows:			
+				if len(row) == 10:
+					repeat = True
+					for i in range(10):
+						self.objects_list.remove(row[0])
+						del row[0]					
+					for row2 in self.rows[self.rows.index(row):]:
+						for obj in row2:
+							obj.y = obj.y + 50
+							self.AddToRow(obj)
+						row2.clear()
+											
 	def ShouldFall(self):
 		for obj in self.objects_list:
 			for fall_obj in self.falling_objects:
@@ -139,45 +143,36 @@ class Manager():
 			for obj in self.falling_objects:
 				obj.MoveLeft()
 			self.reference_coordinate_x = self.reference_coordinate_x - 50
-	
-	def CanRotate(self):
-		#print('is called')
-		self.contemporary_shapes_index = self.shapes_index
-		if self.general_shape[self.shapes_index] != self.general_shape[-1]:
-			self.contemporary_shapes_index = self.contemporary_shapes_index + 1
-		else:
-			self.contemporary_shapes_index = 0
-
-		for obj in self.objects_list:
-			for i in range(1, 5):
-
-				x = self.reference_coordinate_x + self.general_shape[self.contemporary_shapes_index][i][0]
-				y = self.reference_coordinate_y + self.general_shape[self.contemporary_shapes_index][i][1]
-		#		if obj.y == 0:
-		#			print(obj.y, y)
-		#			print('y the same')
-				if obj.x == x and obj.y == y:
-					return False			
-				if y == 750:
-					return False
-					
-		return True
 
 	def Rotate(self):
-		if self.CanRotate():
-			if self.general_shape[self.shapes_index] != self.general_shape[-1]:
-				self.shapes_index = self.shapes_index + 1
-				self.shape = self.general_shape[self.shapes_index]
-			else:
-				self.shapes_index = 0
-				self.shape = self.general_shape[self.shapes_index]
-				
-			for i in range(4):
-				self.x = self.reference_coordinate_x + self.general_shape[self.shapes_index][i + 1][0]
-				self.y = self.reference_coordinate_y + self.general_shape[self.shapes_index][i + 1][1]
-				self.falling_objects[i].x = self.x
-				self.falling_objects[i].y = self.y
+		if self.general_shape[self.shapes_index] != self.general_shape[-1]:
+			self.shapes_index = self.shapes_index + 1
+			self.shape = self.general_shape[self.shapes_index]
+		else:
+			self.shapes_index = 0
+			self.shape = self.general_shape[self.shapes_index]
 			
+		self.cannot_rotate = False
+		for i in range(4):
+			self.x = self.reference_coordinate_x + self.shape[i + 1][0]
+			self.y = self.reference_coordinate_y + self.shape[i + 1][1]			
+			self.falling_objects[i].x = self.x
+			self.falling_objects[i].y = self.y	
+			for obj in self.objects_list:
+				if self.x == obj.x and self.y == obj.y:
+					self.cannot_rotate = True
+			if self.x > 450 or self.y > 700:
+				self.cannot_rotate = True
+				
+		if self.cannot_rotate:
+			self.shapes_index = self.shapes_index - 1
+			self.shape = self.general_shape[self.shapes_index]
+			for i in range(4):
+				self.x = self.reference_coordinate_x + self.shape[i + 1][0]
+				self.y = self.reference_coordinate_y + self.shape[i + 1][1]
+				self.falling_objects[i].x = self.x
+				self.falling_objects[i].y = self.y				
+
 	def GetPositions(self):
 		list_to_return = [(obj.x, obj.y, obj.colour) for obj in self.objects_list + self.falling_objects]
 		return list_to_return
