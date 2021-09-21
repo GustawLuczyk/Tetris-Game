@@ -33,7 +33,7 @@ def button(window, position, text, height = 30):
 	text_render = font.render(text, 1, (50, 50, 200))
 	x, y, w, h = text_render.get_rect()
 	x, y = position
-	pygame.draw.rect(window, (250, 30, 20), (x, y, w, h))
+	#pygame.draw.rect(window, (250, 30, 20), (x, y, w, h))
 	return window.blit(text_render, (x, y))
 	
 
