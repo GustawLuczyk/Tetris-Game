@@ -35,5 +35,13 @@ def button(window, position, text, height = 30):
 	x, y = position
 	#pygame.draw.rect(window, (250, 30, 20), (x, y, w, h))
 	return window.blit(text_render, (x, y))
-	
+
+def combo_button(window, position, text):
+	for height in range(2, 100):
+		font = pygame.font.SysFont('arial', height)
+		text_render = font.render(text, 1, (50, 50, 200))
+		x, y, w, h = text_render.get_rect()
+		x, y = position
+		return window.blit(text_render, (x, y))
+		pygame.display.flip()
 

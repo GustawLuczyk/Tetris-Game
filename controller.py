@@ -1,4 +1,5 @@
 import pygame, view, time, random
+
 from game_model import Manage
 pygame.init()
 
@@ -50,10 +51,23 @@ if __name__ == "__main__":
 				pygame.quit()
 				exit(0)
 	while True:
-		t0 = time.time()
+		'''for height in range(2, 100, 2):
+			view.window_generator()
+			view.window.blit(surface, (500, 0))
+			b1 = view.button(view.window, (600, 100), "Stop")
+			b_punkty = view.button(view.window, (520, 400), "Zdobyte punkty: " + str(punkty), 23)							
+			positions = Manage.GetPositions()						
+			view.squares(0, positions, 50)
+			view.squares((0,0,0), positions, 50, 2)
+			view.line()
+			bonus = view.button(view.window, (50, 200), "Combo 2", height)
+			pygame.display.flip()
+		t1 = time.time()
+		t2 = time.time()'''
+		while t2 - t1 < 1:
+			t2 = time.time()
 		Manage.Fall()
-		
-		
+		t0 = time.time()
 		t1 = time.time()
 		while t1 - t0 < tim:
 			view.window_generator()
