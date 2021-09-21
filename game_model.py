@@ -33,7 +33,15 @@ class Manager():
 		[(200, -100, 100), (0, 0), (50, 0), (50, 50), (50, 100)], [(200, -50, 150), (100, 0), (0, 50), (50, 50), (100, 50)]]
 		self.shape7 = [[(200, -100, 100), (50, 0), (50, 50), (0, 100), (50, 100)], [(200, -50, 150), (0, 0), (0, 50), (50, 50), (100, 50)],
 		[(200, -100, 100), (0, 0), (50, 0), (0, 50), (0, 100)], [(200, -50, 150), (0, 0), (50, 0), (100, 0), (100, 50)]] 
-		self.shapes = [self.shape1, self.shape2, self.shape3, self.shape4, self.shape5, self.shape6, self.shape7]	
+		self.shapes = [self.shape1, self.shape2, self.shape3, self.shape4, self.shape5, self.shape6, self.shape7]
+		self.general_shape_1 = random.choice(self.shapes)
+		self.shape_1 = random.choice(self.general_shape_1)
+		self.general_shape_2 = random.choice(self.shapes)
+		self.shape_2 = random.choice(self.general_shape_2)
+		self.general_shape_3 = random.choice(self.shapes)
+		self.shape_3 = random.choice(self.general_shape_2)
+		self.succeeding_shapes = (self.shape_1, self.shape_2, self.shape_3)
+		
 		self.colours = [(215,35,35), (255,179,26), (102,255,178), (76,153,0), (0,0,204), (153,0,76), (255,255,0)]
 		self.last_colour = (255,255,0)
 		
@@ -44,9 +52,15 @@ class Manager():
 		self.row_y_coordinates = (700, 650, 600, 550, 500, 450, 400, 350, 300, 250, 200, 150, 100, 50, 0)
 	
 	def NewShape(self):
-		self.general_shape = random.choice(self.shapes)
-		self.shape = random.choice(self.general_shape)
-		self.shapes_index = self.general_shape.index(self.shape)
+		self.current_shape = self.shape_1
+		self.general_shape = self.general_shape_1		
+		self.shapes_index = self.general_shape.index(self.current_shape)
+		self.shape_1 = self.shape_2
+		self.general_shape_1 = self.general_shape_2
+		self.shape_2 = self.shape_3
+		self.general_shape_2 = self.general_shape_3
+		self.general_shape_3 = random.choice(self.shapes) 
+		self.shape_3 = random.choice(self.general_shape_3)
 		
 		self.colours.remove(self.last_colour)
 		self.colour = random.choice(self.colours)
@@ -54,10 +68,10 @@ class Manager():
 		self.last_colour = self.colour
 				
 		for i in range(1, 5):
-			self.reference_coordinate_x = self.shape[0][0]
-			self.reference_coordinate_y = self.shape[0][1]
-			self.x = self.reference_coordinate_x + self.shape[i][0]
-			self.y = self.reference_coordinate_y + self.shape[i][1]
+			self.reference_coordinate_x = self.current_shape[0][0]
+			self.reference_coordinate_y = self.current_shape[0][1]
+			self.x = self.reference_coordinate_x + self.current_shape[i][0]
+			self.y = self.reference_coordinate_y + self.current_shape[i][1]
 			self.falling_objects.append(Brick(self.x, self.y, self.colour))
 			
 	def AddToRow(self, obj):
@@ -121,7 +135,7 @@ class Manager():
 			for fall_obj in self.falling_objects:
 				if obj.x == fall_obj.x + 50 and obj.y == fall_obj.y:
 						return False														
-		if self.reference_coordinate_x + self.shape[0][2] < 500:
+		if self.reference_coordinate_x + self.current_shape[0][2] < 500:
 			return True
 
 	def CanMoveLeft(self):
@@ -147,15 +161,15 @@ class Manager():
 	def Rotate(self):
 		if self.general_shape[self.shapes_index] != self.general_shape[-1]:
 			self.shapes_index = self.shapes_index + 1
-			self.shape = self.general_shape[self.shapes_index]
+			self.current_shape = self.general_shape[self.shapes_index]
 		else:
 			self.shapes_index = 0
-			self.shape = self.general_shape[self.shapes_index]
+			self.current_shape = self.general_shape[self.shapes_index]
 			
 		self.cannot_rotate = False
 		for i in range(4):
-			self.x = self.reference_coordinate_x + self.shape[i + 1][0]
-			self.y = self.reference_coordinate_y + self.shape[i + 1][1]			
+			self.x = self.reference_coordinate_x + self.current_shape[i + 1][0]
+			self.y = self.reference_coordinate_y + self.current_shape[i + 1][1]			
 			self.falling_objects[i].x = self.x
 			self.falling_objects[i].y = self.y	
 			for obj in self.objects_list:
@@ -166,15 +180,26 @@ class Manager():
 				
 		if self.cannot_rotate:
 			self.shapes_index = self.shapes_index - 1
-			self.shape = self.general_shape[self.shapes_index]
+			self.current_shape = self.general_shape[self.shapes_index]
 			for i in range(4):
-				self.x = self.reference_coordinate_x + self.shape[i + 1][0]
-				self.y = self.reference_coordinate_y + self.shape[i + 1][1]
+				self.x = self.reference_coordinate_x + self.current_shape[i + 1][0]
+				self.y = self.reference_coordinate_y + self.current_shape[i + 1][1]
 				self.falling_objects[i].x = self.x
 				self.falling_objects[i].y = self.y				
 
 	def GetPositions(self):
-		list_to_return = [(obj.x, obj.y, obj.colour) for obj in self.objects_list + self.falling_objects]
-		return list_to_return
+		return [(obj.x, obj.y, obj.colour) for obj in self.objects_list + self.falling_objects]
+		
+	def GetSucceedingShapes(self, size, position1, position2, position3):
+		'''Controller uses the method to get positions (x, y, colour) of succeeding shapes,
+		that are going to be displayed on the right side of the window. Controller provides
+		arguments: size, and positions (x, y) of the 3 shapes'''
+		self.to_return = []
+		self.positions = (position1, position2, position3)
+		for shape in self.succeeding_shapes:
+			for i in range(1, 5):
+				self.to_return.append((self.positions[self.succeeding_shapes.index(shape)][0] + shape[i][0]//50 * size, self.positions[self.succeeding_shapes.index(shape)][1] +  shape[i][1]//50 * size, 0))					
+		return self.to_return
 
 Manage = Manager() #This object is to be imported
+
