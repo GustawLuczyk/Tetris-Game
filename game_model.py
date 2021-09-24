@@ -1,5 +1,6 @@
 import random
 
+
 class Brick():			
 	def __init__(self, x, y, colour):
 		self.x = x
@@ -17,8 +18,11 @@ class Brick():
 		
 	def __del__(self):
 		pass
+		
+		
 
 class Manager():
+	
 	
 	def __init__(self):
 		self.objects_list = []
@@ -50,6 +54,7 @@ class Manager():
 
 		self.rows = [[] for n in range(15)] 
 		self.row_y_coordinates = (700, 650, 600, 550, 500, 450, 400, 350, 300, 250, 200, 150, 100, 50, 0)
+		
 	
 	def NewShape(self):
 		'''Creates new shape every time shape stops falling. The method
@@ -64,7 +69,7 @@ class Manager():
 		self.general_shape_2 = self.general_shape_3
 		self.general_shape_3 = random.choice(self.shapes) 
 		self.shape_3 = random.choice(self.general_shape_3)
-		print(self.general_shape_3)
+		self.succeeding_shapes = (self.shape_1, self.shape_2, self.shape_3)
 		
 		self.colours.remove(self.last_colour)
 		self.colour = random.choice(self.colours)
@@ -78,9 +83,11 @@ class Manager():
 			self.y = self.reference_coordinate_y + self.current_shape[i][1]
 			self.falling_objects.append(Brick(self.x, self.y, self.colour))
 			
+			
 	def AddToRow(self, obj):
 		'''Adds an object to a proper row list'''
-		self.rows[self.row_y_coordinates.index(obj.y)].append(obj)		
+		self.rows[self.row_y_coordinates.index(obj.y)].append(obj)	
+			
 
 	def RemoveRow(self):
 		'''removes full rows and orders objects located above the deleted rows to fall.
@@ -100,6 +107,7 @@ class Manager():
 							obj.y = obj.y + 50
 							self.AddToRow(obj)
 						row2.clear()
+						
 											
 	def ShouldFall(self):
 		'''Checks falling shape's possibility to fall'''
@@ -113,6 +121,7 @@ class Manager():
 				return False
 				
 		return True
+		
 			
 	def Fall(self):
 		'''The main method used by controller to order falling shapes to fall. The
@@ -134,6 +143,7 @@ class Manager():
 					self.objects_list.append(obj)
 			self.RemoveRow()
 			self.NewShape()
+			
 	
 	def FallFaster(self):
 		'''Allowes user to speed up falling of falling shapes after 
@@ -143,6 +153,7 @@ class Manager():
 			for obj in self.falling_objects:
 				obj.Falling()
 			self.reference_coordinate_y = self.reference_coordinate_y + 50
+			
 	
 	def CanMoveRight(self):
 		'''Called by the method MoveRight checks if the position 
@@ -154,6 +165,7 @@ class Manager():
 						return False														
 		if self.reference_coordinate_x + self.current_shape[0][2] < 500:
 			return True
+			
 
 	def CanMoveLeft(self):
 		'''Called by the method MoveLeft checks if the position 
@@ -166,6 +178,7 @@ class Manager():
 		if self.reference_coordinate_x > 0:
 			return True
 			
+			
 	def MoveRight(self):
 		'''Allowes user to move to the right falling objects'''
 		
@@ -173,6 +186,7 @@ class Manager():
 			for obj in self.falling_objects:
 				obj.MoveRight()
 			self.reference_coordinate_x = self.reference_coordinate_x + 50
+			
 
 	def MoveLeft(self):
 		'''Allowes user to move to the left falling objects'''
@@ -181,6 +195,7 @@ class Manager():
 			for obj in self.falling_objects:
 				obj.MoveLeft()
 			self.reference_coordinate_x = self.reference_coordinate_x - 50
+			
 
 	def Rotate(self):
 		'''Rotates falling shapes only if shape's position allowes to do so'''
@@ -211,13 +226,15 @@ class Manager():
 				self.x = self.reference_coordinate_x + self.current_shape[i + 1][0]
 				self.y = self.reference_coordinate_y + self.current_shape[i + 1][1]
 				self.falling_objects[i].x = self.x
-				self.falling_objects[i].y = self.y				
+				self.falling_objects[i].y = self.y	
+							
 
 	def GetPositions(self):
 		'''Controller uses the method to get positions (x, y, colour) of all objects,
 		except for succeeding objects (the method below)'''
 		
 		return [(obj.x, obj.y, obj.colour) for obj in self.objects_list + self.falling_objects]
+		
 		
 	def GetSucceedingShapes(self, size, position1, position2, position3):
 		'''Controller uses the method to get positions (x, y, colour) of succeeding shapes,
