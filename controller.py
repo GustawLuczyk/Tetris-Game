@@ -1,20 +1,32 @@
 import pygame, view, time, random
-
+from audioplayer import AudioPlayer
 from game_model import Manage
 pygame.init()
 
-pygame.mixer.init()
-pygame.mixer.music.load("2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3")
-pygame.mixer.music.set_volume(0.7)
+# pygame.mixer.init()
+# pygame.mixer.music.load("./sounds/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3")
+# pygame.mixer.music.set_volume(0.7)
 
 
+sound = AudioPlayer("./sounds/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3")
+sound.play()
+
+'''
+./	- katalog biezacy
+./sounds - pod katalog
+
+../ katalog nadrzedny
+
+/ - root katalog
+
+'''
 
 surface = pygame.Surface((250, 750))
 surface.fill((80,220,100))
 taudio = time.time()
 if __name__ == "__main__":
 	view.window_generator()
-	pygame.mixer.music.play()
+	#pygame.mixer.music.play()
 	punkty = 0
 	tim = 1
 	startbutton0 = view.button(view.window, (10, 10), "Wybierz poziom trudności")
@@ -83,8 +95,8 @@ if __name__ == "__main__":
 			pygame.display.flip()
 			t1 = time.time()
 			taudio1 = time.time()
-			if int(taudio1 - taudio) % 26 == 0:
-				pygame.mixer.music.play()
+			#if int(taudio1 - taudio) % 26 == 0:
+				#pygame.mixer.music.play()
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
