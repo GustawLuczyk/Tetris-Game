@@ -113,7 +113,7 @@ if __name__ == "__main__":
 						while go_down:
 							positionsA = positions
 							t0 = time.time()
-							Manage.FallFaster()
+							Manage.Fall()
 							view.window_generator()
 							view.window.blit(surface, (500, 0))
 							b1 = view.button(view.window, (600, 100), "Stop")
