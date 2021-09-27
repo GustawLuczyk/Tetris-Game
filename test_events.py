@@ -34,7 +34,7 @@ def test_equeue_set_event_correct():
     '''
     q = EventsQueue()
     q.event = Event()
-    q.event = NoEvent()
+    q.event = NoEvent.NoEvent
     
 
 
@@ -45,7 +45,7 @@ def test_equeue_correct_elements_order():
     '''
     q = EventsQueue()
     q.event = Event()        # 1 - element
-    q.event = NoEvent()      # 2 - element
+    q.event = NoEvent.NoEvent      # 2 - element
     q.event = Event()        # 3 - element
 
     assert isinstance(q.event, Event)    # sprawdzenie czy 1 element sie zgadza

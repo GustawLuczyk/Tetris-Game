@@ -1,16 +1,17 @@
-from events import Event, EventsQueue
+from events import *
 import time
 from enum import Enum, IntEnum, unique, auto
 
 @unique
 class TimerEvent(Event, Enum):
+    '''Klasa zdarzenia czasowego
+    '''
     TinyTick = auto()
     SmallTick = auto()
     NormalTick = auto()
-    
 
 
-class Timer(object):
+class Timer(EventsProcessor):
     '''Klasa realizująca timer, ktory wysyla do kolejki zdarzen
     zdarzenia TICK: tiny, small, normal w zaleznosci od czasu
     '''

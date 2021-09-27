@@ -1,16 +1,31 @@
+from abc import abstractmethod
 from enum import Enum, IntEnum, unique, auto
 
-
 class Event(object):
+    '''Klasa podstawowa dla wszystkich zdarzen
+    '''
     pass
 
-class NoEvent(Event):
-    pass
-    
+@unique
+class NoEvent(Event, Enum):
+    '''Klasa pochodna zdarzenia - brak zdarzenia
+    '''
+    NoEvent = auto()
 
+class EventsProcessor(object):
+    '''Klasa abstrakcyjna dla wszystkich klas 
+    tworzacych/odbierajacych zdarzenia
+    '''
+    @abstractmethod
+    def process(self, eventQueue):
+        '''Metoda abstrakcyjna - musi byc zaimplementowana w klasie pochodnej
+        '''
+        pass
 
 class EventsQueue(object):
     '''Klasa implementujaca kolejke FIFO zdarzen - oboiektow klasy Event
+    Obiekt tej klasy jest odpowiedzialny za przekazywanie poszczegolnym
+    obiektom zdarzenia do procezsowania - obiekty pochodne klasy EventProcessor
     '''
     
     # Klasa definiuje tylko 3 atrybuty 
@@ -36,7 +51,7 @@ class EventsQueue(object):
         if len(self.__queue.keys()) == 0:
             self.__head = 0
             self.__tail = 0
-            return NoEvent()
+            return NoEvent.NoEvent
         else:
             return self.__queue[self.__head]
     
@@ -67,6 +82,5 @@ class EventsQueue(object):
         Wykorzystuje event.setter
         '''
         self.event = ev
-        
         
 
