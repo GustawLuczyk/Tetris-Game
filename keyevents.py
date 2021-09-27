@@ -21,6 +21,7 @@ class KeyState(Enum):
     NONE = auto()
     UP = auto()
     DOWN = auto()
+    REPEAT = auto()
     
 
 class KeyEvent(Event):
@@ -60,6 +61,7 @@ class KeyProcess(EventsProcessor):
         for key in KeyType:
             self.__keys[key] = KeyState.NONE
     
+    
     def process(self, events):
         '''Funkcja przetwarzajaca zdarzenia w kolejce zdarzen
         Dodaje do kolejki zdarzenia KeyEvents kiedy pojawia sie 
@@ -74,5 +76,13 @@ class KeyProcess(EventsProcessor):
                 if ev.pgevent.type == pygame.KEYDOWN:
                     pass
                 if ev.pgevent.type == pygame.KEYUP:
-                    pass
+                    if ev.pgevent.key == pygame.K_LEFT:
+                        pass
+                if ev.pgevent.type == pygame.QUIT:
+                    events.remove()
+                    key = KeyEvent()
+                    key.key = KeyType.EXIT
+                    key.state = KeyState.DOWN
+                    events.add(key)
+
                 
