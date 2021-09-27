@@ -52,11 +52,12 @@ def run():
         key_processor.process(event_queue)
         update_board(model, event_queue)
 
-        try:
+        #try:
+        if isinstance(event_queue.event, KeyEvent):
             if event_queue.event.key == KeyType.EXIT:
                 quit = True
-        except:
-            pass
+        #except:
+        #    pass
    
 
 if __name__ == "__main__":
