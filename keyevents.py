@@ -1,6 +1,7 @@
 from enum import Enum, IntEnum, unique, auto
 from pygame.constants import KEYDOWN
 from events import *
+from pgevents import *
 
 @unique
 class KeyType(Enum):
@@ -66,4 +67,12 @@ class KeyProcess(EventsProcessor):
         '''
         assert isinstance(events, EventsQueue), "Error: events not an object of EventsQueue"
         ev = events.event
-        
+        if isinstance(ev, KeyEvent):
+            events.remove()
+        else:
+            if isinstance(ev, PygameEvent):
+                if ev.pgevent.type == pygame.KEYDOWN:
+                    pass
+                if ev.pgevent.type == pygame.KEYUP:
+                    pass
+                
