@@ -13,6 +13,7 @@ class Brick():
         
 	@x.setter
 	def x(self, x):
+		assert type(x) == int
 		self.__x = x
         
 	@property
@@ -21,6 +22,7 @@ class Brick():
         
 	@y.setter
 	def y(self, y):
+		assert type(y) == int
 		self.__y = y
         
 	@property
@@ -29,6 +31,7 @@ class Brick():
         
 	@color.setter
 	def color(self, color):
+		assert type(color) == tuple
 		self.__color = color
         		
 	def __del__(self):
@@ -39,6 +42,9 @@ class Brick():
 class Shape():
 	
 	def __init__(self, lst, gen_shape, shape, color):
+		
+		assert type(gen_shape) == list, "Given unproper 'gen_shape' parameter"
+		assert type(shape) == list and len(shape) == 5, "Given unproper 'shape' parameter"
 		
 		self.__objects_list = lst
 		self.__my_objects = []
@@ -79,6 +85,7 @@ class Shape():
 		for obj in self.__my_objects:
 			obj.y = obj.y + 50
 		self.__y_coordinate = self.__y_coordinate + 50 
+		return self.__y_coordinate
 		
 		
 	def CanMoveRight(self):
@@ -101,6 +108,7 @@ class Shape():
 			for my_obj in self.__my_objects:
 				my_obj.x = my_obj.x + 50
 		
+		return self.__x_coordinate
 		
 	def CanMoveLeft(self):
 		'''Checks shape's possiblity to move left'''
@@ -120,7 +128,8 @@ class Shape():
 			self.__x_coordinate = self.__x_coordinate - 50
 			for my_obj in self.__my_objects:
 				my_obj.x = my_obj.x - 50
-				
+
+		return self.__x_coordinate	
 	
 	def Rotate(self):
 		'''Rotates falling shapes only if shape's position allowes to do so'''
