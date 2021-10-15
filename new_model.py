@@ -108,7 +108,6 @@ class Shape():
 			for my_obj in self.__my_objects:
 				my_obj.x = my_obj.x + 50
 		
-		return self.__x_coordinate
 		
 	def CanMoveLeft(self):
 		'''Checks shape's possiblity to move left'''
@@ -128,8 +127,7 @@ class Shape():
 			self.__x_coordinate = self.__x_coordinate - 50
 			for my_obj in self.__my_objects:
 				my_obj.x = my_obj.x - 50
-
-		return self.__x_coordinate	
+	
 	
 	def Rotate(self):
 		'''Rotates falling shapes only if shape's position allowes to do so'''
@@ -201,10 +199,10 @@ class ShapesBase():
 		self.__shape = self.__shape1
 		self.__color = self.__color1
 		self.__gen_shape1 = self.__gen_shape2
-		self.__shape1 = random.choice(self.__gen_shape1)
+		self.__shape1 = self.__shape2
 		self.__color1 = self.__color2
 		self.__gen_shape2 = self.__gen_shape3
-		self.__shape2 = random.choice(self.__gen_shape2)
+		self.__shape2 = self.__shape3
 		self.__color2 = self.__color3
 		self.__gen_shape3 = random.choice(self.__shapes)
 		self.__shape3 = random.choice(self.__gen_shape3)
