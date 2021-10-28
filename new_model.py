@@ -63,6 +63,7 @@ class Shape():
 		'''Returns updated objects list'''
 		
 		return self.__objects_list + self.__my_objects
+
 		
 		
 	def CanFall(self):
