@@ -1,4 +1,5 @@
 from abc import *
+from typing import Iterable
 
 class AIprocessor:
 	'''Used by client to create logic chains'''
@@ -11,10 +12,10 @@ class Request:
 	'''Creates request objects'''
 	
 	def __init__(self, obj_lst, patt, position):
-		self.obj_lst = obj_lst
-		self.pattern = patt
-		self.position = position
-		self.possible_positions = []		
+		self.__obj_lst = obj_lst
+		self.__pattern = patt
+		self.__position = position
+		self.__possible_positions = []		
 
 
 	@property
@@ -53,7 +54,7 @@ class Request:
 
 
 	@possible_positions.setter
-	def possible_position(self, pos):
+	def possible_positions(self, pos):
 		self.__possible_positions = pos
 
 
@@ -80,9 +81,15 @@ class PosPlaceHandler(BaseHandler):
 	'''Find best place for current falling shape'''
 
 
+
+	def __init__(self):
+		pass
+
+
+
 	def Handle(self, request):
 		'''Main method to find best place. Iterates over 
-		shape's patterns'''
+		shape's patterns. Returns list: [(shape_patt, [(x, y), ... n]) ... n]'''
 
 		possible_positions = []
 		obj_lst = request.obj_lst
@@ -90,14 +97,15 @@ class PosPlaceHandler(BaseHandler):
 		for shape_patt in request.pattern:			
 			shape_length = shape_patt[0][2]
 			low_shape = self.LowestInShape(shape_patt, shape_length)
-			possible_positions = self.PossiblePositions(low_shape, shape_length, obj_lst)
+			positions = self.PossiblePositions(low_shape, shape_length, obj_lst)
+			possible_positions.extend((shape_patt, positions))
 
-		return request.possible_positions.append(possible_positions)
+		return request.possible_positions.extend(possible_positions)
 
 
 	def PossiblePositions(self, low_shape, shape_length, obj_lst):
 		'''Returns posible shape's positions [(x, y) ... n] excluding those that 
-		create free spaces below the shape.'''
+		create empty spaces below the shape.'''
 
 		lst = []
 		x = 0
@@ -113,7 +121,7 @@ class PosPlaceHandler(BaseHandler):
 		return lst
 
 
-	def LowestInShape(self, shape_patt, shape_length):
+	def LowestInShape(self, shape_patt: Iterable, shape_length: int):
 		'''Saves lowest parts of a shape in the list [y0, ... yn]'''
 
 		lst = []
@@ -138,3 +146,43 @@ class PosPlaceHandler(BaseHandler):
 				lst.append(750)
 				
 		return lst
+
+
+
+class RowsHandler(BaseHandler):
+	'''Find positionings that allow deleting a row; discard the rest of
+	positionings'''
+
+
+	def __init__(self):
+		pass
+
+
+
+	def Handle(self, request: object):
+		'''Check the possibility of removing rows'''
+		rows = [[] for n in range(15)] 
+		row_y_coordinates = [700 - n * 50 for n in range(15)]
+
+		for obj in request.obj_lst:
+			rows[row_y_coordinates.index(obj.y)] += 1
+
+		positions_removing_rows = [(shape[0], []) for shape in request.possible_positions]
+		for shape in request.possible_positions:
+			for shape_pos in shape[1]:				
+				objs_positions = [shape_pos[1] + shape[0][i][1] for i in range(1, 5)]
+				for pos in objs_positions:
+					rows[row_y_coordinates.index(pos)] += 1
+					if len(rows[row_y_coordinates.index(pos)]) == 10:
+						positions_removing_rows[request.possible_positions.index(shape)][1].append(shape_pos)
+						break
+		
+		counter = 0
+		for shape in positions_removing_rows:
+			if len(shape[1]) != 0:
+				counter += len(shape[1])
+
+		if counter == 1:
+			pass			#end the chain
+		elif counter > 1:
+			request.possible_positions = positions_removing_rows 
