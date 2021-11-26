@@ -11,7 +11,7 @@ class AIprocessor:
 class Request:
 	'''Creates request objects'''
 	
-	def __init__(self, obj_lst, patt, position):
+	def __init__(self, obj_lst: Iterable, patt: Iterable, position: Iterable):
 		self.__obj_lst = obj_lst
 		self.__pattern = patt
 		self.__position = position
@@ -50,7 +50,7 @@ class Request:
 
 	@property
 	def possible_positions(self):
-		return self.__possible_position
+		return self.__possible_positions
 
 
 	@possible_positions.setter
@@ -87,7 +87,7 @@ class PosPlaceHandler(BaseHandler):
 
 
 
-	def Handle(self, request):
+	def Handle(self, request: object):
 		'''Main method to find best place. Iterates over 
 		shape's patterns. Returns list: [(shape_patt, [(x, y), ... n]) ... n]'''
 
@@ -98,8 +98,8 @@ class PosPlaceHandler(BaseHandler):
 			shape_length = shape_patt[0][2]
 			low_shape = self.LowestInShape(shape_patt, shape_length)
 			positions = self.PossiblePositions(low_shape, shape_length, obj_lst)
-			possible_positions.extend((shape_patt, positions))
-
+			pos = (shape_patt, positions)
+			possible_positions.append(pos)
 		return request.possible_positions.extend(possible_positions)
 
 
@@ -109,13 +109,11 @@ class PosPlaceHandler(BaseHandler):
 
 		lst = []
 		x = 0
-		while x + shape_length < 500:
+		while x + shape_length <= 500:
 			max_in_columns = self.MaxInColumns(shape_length, x, obj_lst)							
 			a = [max_in_columns[i] - 50 - low_shape[i] for i in range(len(low_shape))]
-			print(a)
 			if max(a) == min(a):
 				lst.append((x, a[0]))
-			#	print('condition is true')
 			x += 50
 		
 		return lst
@@ -133,7 +131,7 @@ class PosPlaceHandler(BaseHandler):
 
 
 	def MaxInColumns(self, shape_length, x, obj_lst):
-		'''Finds highest brick objects in columns that are considered and returns
+		'''Finds highest brick objects in columns that are being considered and returns
 		them in a list [y0, ... yn]'''
 
 		lst = []
@@ -158,25 +156,13 @@ class RowsHandler(BaseHandler):
 		pass
 
 
-
 	def Handle(self, request: object):
-		'''Check the possibility of removing rows'''
-		rows = [[] for n in range(15)] 
-		row_y_coordinates = [700 - n * 50 for n in range(15)]
-
-		for obj in request.obj_lst:
-			rows[row_y_coordinates.index(obj.y)] += 1
-
-		positions_removing_rows = [(shape[0], []) for shape in request.possible_positions]
-		for shape in request.possible_positions:
-			for shape_pos in shape[1]:				
-				objs_positions = [shape_pos[1] + shape[0][i][1] for i in range(1, 5)]
-				for pos in objs_positions:
-					rows[row_y_coordinates.index(pos)] += 1
-					if len(rows[row_y_coordinates.index(pos)]) == 10:
-						positions_removing_rows[request.possible_positions.index(shape)][1].append(shape_pos)
-						break
+		'''Check the possibility of removing rows. If no possibility, possible_positions list
+		remains unchanged. Otherwise the list is being updated and contains positionings
+		allowing removing rows'''
 		
+		positions_removing_rows = self.FindPossibilities(request)
+
 		counter = 0
 		for shape in positions_removing_rows:
 			if len(shape[1]) != 0:
@@ -186,3 +172,41 @@ class RowsHandler(BaseHandler):
 			pass			#end the chain
 		elif counter > 1:
 			request.possible_positions = positions_removing_rows 
+
+		
+	def FindPossibilities(self, request: object):
+		'''The algorithm of finding positions allowing removing shapes'''
+
+		rows, row_y_coordinates = self.CountObjsRows(request)
+		positions_removing_rows = [(shape[0], []) for shape in request.possible_positions]
+		rows_copy = rows.copy()
+
+		for shape in request.possible_positions:
+			
+			for shape_pos in shape[1]:	
+				counter = 0			
+				objs_positions = [shape_pos[1] + shape[0][i][1] for i in range(1, 5)]
+				
+				for pos in objs_positions:
+					rows_copy[row_y_coordinates.index(pos)] += 1
+					if rows_copy[row_y_coordinates.index(pos)] == 10:
+						counter += 1
+				
+				rows_copy = rows.copy()
+				if counter > 0:
+					shape_to_append = (shape_pos[0], shape_pos[1], counter)
+					positions_removing_rows[request.possible_positions.index(shape)][1].append(shape_to_append)			
+
+		return positions_removing_rows
+
+		
+	def CountObjsRows(self, request: object) -> list:
+		'''Count in rows objs from obj_lst'''
+
+		rows = [0 for n in range(15)] 
+		row_y_coordinates = [700 - n * 50 for n in range(15)]
+
+		for obj in request.obj_lst[:-4]:
+			rows[row_y_coordinates.index(obj.y)] += 1
+
+		return rows, row_y_coordinates
