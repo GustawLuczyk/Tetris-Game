@@ -163,6 +163,22 @@ class RowsHandler(BaseHandler):
 		
 		positions_removing_rows = self.FindPossibilities(request)
 
+		max = 1
+		positions = []
+		for shape in positions_removing_rows:
+			if len(shape[1]) == 0:
+				positions_removing_rows.remove(shape)
+			else:
+				app_in_shape = []
+				for pos in shape[1]:
+					if pos[2] == max:
+						app = (pos[0], pos[1])
+						app_in_shape.append(app)
+				if len(app_in_shape) > 0:
+					app = (shape[0], app_in_shape)
+					positions.append(app)
+
+
 		counter = 0
 		for shape in positions_removing_rows:
 			if len(shape[1]) != 0:
@@ -181,8 +197,10 @@ class RowsHandler(BaseHandler):
 		positions_removing_rows = [(shape[0], []) for shape in request.possible_positions]
 		rows_copy = rows.copy()
 
+		max = 1
 		for shape in request.possible_positions:
 			
+			can_remove_row = False
 			for shape_pos in shape[1]:	
 				counter = 0			
 				objs_positions = [shape_pos[1] + shape[0][i][1] for i in range(1, 5)]
@@ -191,11 +209,30 @@ class RowsHandler(BaseHandler):
 					rows_copy[row_y_coordinates.index(pos)] += 1
 					if rows_copy[row_y_coordinates.index(pos)] == 10:
 						counter += 1
+						can_remove_row = True
 				
 				rows_copy = rows.copy()
-				if counter > 0:
-					shape_to_append = (shape_pos[0], shape_pos[1], counter)
-					positions_removing_rows[request.possible_positions.index(shape)][1].append(shape_to_append)			
+				if counter == max:
+					for shape1 in positions_removing_rows:
+						if shape1[0] == shape[0]:
+							shape1[1].append(shape_pos)
+
+				elif counter > max:
+					max = counter					
+					index = 0
+					for shape1 in positions_removing_rows:
+						if shape1[0] != shape[0]:
+							index += 1
+						elif shape1[0] == shape[0]:
+							break
+					for i in range(index):
+						positions_removing_rows.remove(positions_removing_rows[0])
+					positions_removing_rows[0][1] = [shape_pos]
+
+			if not can_remove_row:										
+				for shape1 in positions_removing_rows:
+					if shape1[0] == shape[0]:
+						positions_removing_rows.remove(shape1)
 
 		return positions_removing_rows
 
@@ -210,3 +247,55 @@ class RowsHandler(BaseHandler):
 			rows[row_y_coordinates.index(obj.y)] += 1
 
 		return rows, row_y_coordinates
+
+
+
+class LevelHandler(BaseHandler):
+	'''Check which position is the lowest and choose final position'''
+
+	def __init__(self):
+		pass
+
+
+	def Handle(self, request):
+		'''Iterate over positions and choose the lowest:
+		if few of them, choose between them randmoly'''
+
+		min = 0 														#min means the lowest position; but the number is greates
+		for shape in request.possible_positions:
+			for pos in shape[1]:
+				if pos[1] < min:
+					shape[1].remove(pos)
+				elif pos[1] > min:
+					min = pos[1]
+					self.RemovePrevious(request.possible_positions, pos, shape)
+		
+		for shape in request.possible_positions:
+			if len(shape[1]) == 0:
+				request.possible_positions.remove(shape)
+
+
+	def RemovePrevious(self, positions, pos, shape):
+		print('removing shape')
+		index = positions.index(shape)
+		for i in range(index):
+			print('removing')
+			positions.remove(positions[0])
+
+		print('removing pos')
+		index = shape[1].index(pos)
+		print(index)
+		for i in range(index):
+			sh = (shape[1][0])
+			if sh in shape[1]:
+				print('True')
+			print(sh)
+			shape[1].remove(sh)
+			print('removed')
+		
+#		for shape1 in positions:
+#			if shape1[0] == shape[0]:
+#	#		positions.remove(shape1)
+
+
+

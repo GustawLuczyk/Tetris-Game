@@ -80,4 +80,28 @@ def test_RowsHandler_FindPossibilities():
 	Pos = AIgamer.PosPlaceHandler()
 	Pos.Handle(request)
 	ret = ai.FindPossibilities(request)
-	assert ret == [(patt[0], []), (patt[1], [(0, 700, 1)])]
+	assert ret == [(patt[1], [(0, 700)])]
+
+
+def test_LevelHandler_RemovePrevious():
+	'''Check if removes all previous pattern tuples and
+	positions in the current list'''
+
+	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
+	request = AIgamer.Request([], patt, 0)
+	request.possible_positions = [(patt[0], [(0, 450)]), (patt[1], [(0, 500), (0, 550), (50, 550)])]
+	ai = AIgamer.LevelHandler()
+	ai.RemovePrevious(request.possible_positions, (0, 550), (patt[1], [(0, 500), (0, 550), (50, 550)]))
+	assert request.possible_positions == [(patt[1], [(0, 550), (50, 550)])]
+
+'''
+def test_LevelHandler_Handle():
+	Check if request contains list with lowest positions
+
+	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
+	ai = AIgamer.LevelHandler()
+	request = AIgamer.Request([], patt, 0)
+	request.possible_positions = [(patt[0], [(0, 450)]), (patt[1], [(0, 500), (0, 550), (50, 550)])]
+	ai.Handle
+	assert ret == [(patt[1], [(0, 700)])]
+	'''
