@@ -1,5 +1,8 @@
 from abc import *
 from typing import Iterable
+import random
+
+
 
 class AIprocessor:
 	'''Used by client to create logic chains'''
@@ -15,7 +18,8 @@ class Request:
 		self.__obj_lst = obj_lst
 		self.__pattern = patt
 		self.__position = position
-		self.__possible_positions = []		
+		self.__possible_positions = []	
+		self.__final_position = None	
 
 
 	@property
@@ -56,6 +60,16 @@ class Request:
 	@possible_positions.setter
 	def possible_positions(self, pos):
 		self.__possible_positions = pos
+
+
+	@property
+	def final_position(self):
+		return self.__final_position
+
+
+	@final_position.setter
+	def final_position(self, pos):
+		self.__final_position = pos
 
 
 
@@ -253,49 +267,50 @@ class RowsHandler(BaseHandler):
 class LevelHandler(BaseHandler):
 	'''Check which position is the lowest and choose final position'''
 
+
 	def __init__(self):
 		pass
 
 
-	def Handle(self, request):
-		'''Iterate over positions and choose the lowest:
-		if few of them, choose between them randmoly'''
+	def Handle(self, request: object):
+		'''Find lowest positions and choose one of them randomly - that is the
+		final position'''
 
-		min = 0 														#min means the lowest position; but the number is greates
+		min, patts = self.FindMinPatt(request)
+
+		patt = random.choice(patts)
+		min_positions = []
+
+		for shape in request.possible_positions:
+			if patt == shape[0]:
+				for pos in shape[1]:
+					if pos[1] == min:
+						min_positions.append(pos)
+
+		min_pos = random.choice(min_positions)
+		request.final_position = (patt, min_pos)
+
+
+	def FindMinPatt(self, request: object):
+		'''Find lowest positions (highest y coordinate value) and shape patterns
+		in which they occur'''
+
+		min = 0
+		patts = []
+
 		for shape in request.possible_positions:
 			for pos in shape[1]:
-				if pos[1] < min:
-					shape[1].remove(pos)
+				if pos[1] == min and shape[0] not in patts:
+					patts.append(shape[0])
 				elif pos[1] > min:
 					min = pos[1]
-					self.RemovePrevious(request.possible_positions, pos, shape)
+					patts.clear()
+					patts.append(shape[0])
+
+		return min, patts
+
+	
+
 		
-		for shape in request.possible_positions:
-			if len(shape[1]) == 0:
-				request.possible_positions.remove(shape)
-
-
-	def RemovePrevious(self, positions, pos, shape):
-		print('removing shape')
-		index = positions.index(shape)
-		for i in range(index):
-			print('removing')
-			positions.remove(positions[0])
-
-		print('removing pos')
-		index = shape[1].index(pos)
-		print(index)
-		for i in range(index):
-			sh = (shape[1][0])
-			if sh in shape[1]:
-				print('True')
-			print(sh)
-			shape[1].remove(sh)
-			print('removed')
-		
-#		for shape1 in positions:
-#			if shape1[0] == shape[0]:
-#	#		positions.remove(shape1)
-
 
 

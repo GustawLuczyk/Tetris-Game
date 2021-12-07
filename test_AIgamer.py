@@ -57,7 +57,7 @@ def test_PosPos_Handle():
 	# [(0, 500), (50, 500), (100, 500), (150, 500), (200, 500), (250, 500), (300, 550), (350, 550), (400, 550), (450, 550)]
 
 
-def test_CountObjsRows():
+def test_RowsHandler_CountObjsRows():
 	'''Check if the method properly counts number of objects in obj_lst[:-4]'''
 
 	obj_lst = [model.Brick(i * 50, 700, (0,0,0)) for i in range(10)]
@@ -73,35 +73,41 @@ def test_CountObjsRows():
 def test_RowsHandler_FindPossibilities():
 	'''Check if the method FindPossibilities returns correctly modified list'''
 
-	obj_lst = [model.Brick(200 + i * 50, 700, (0,0,0)) for i in range(10)]
+	obj_lst = [model.Brick(50 + i * 50, 700, (0,0,0)) for i in range(9)] 
+	obj_lst.append([model.Brick(50 + i * 50, 650, (0,0,0)) for i in range(9)])
+	obj_lst.append([model.Brick(200 + i * 50, 700, (0,0,0)) for i in range(10)])
 	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
 	ai = AIgamer.RowsHandler()
 	request = AIgamer.Request(obj_lst, patt, 0)
-	Pos = AIgamer.PosPlaceHandler()
-	Pos.Handle(request)
+	request.possible_positions = [(patt[1], [(0, 550), (300, 500)]), (patt[0], [(50, 400), (0, 500), (450, 350)])]
 	ret = ai.FindPossibilities(request)
-	assert ret == [(patt[1], [(0, 700)])]
+	assert ret == [(patt[0], [(0, 500)])]
 
 
-def test_LevelHandler_RemovePrevious():
-	'''Check if removes all previous pattern tuples and
-	positions in the current list'''
+def test_LevelHandler_FindMinPatt():
+	'''Check if the method finds the lowest position's value and if it records
+	patterns that contain that position'''
 
-	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
-	request = AIgamer.Request([], patt, 0)
-	request.possible_positions = [(patt[0], [(0, 450)]), (patt[1], [(0, 500), (0, 550), (50, 550)])]
+	patt = [[(200, -100, 100), (0, 0), (0, 50), (50, 50), (0, 100)], [(200, -50, 150), (0, 0), (50, 0), (100, 0), (50, 50)],
+	[(200, -100, 100), (50, 0), (0, 50), (50, 50), (50, 100)], [(200, -50, 150), (50, 0), (0, 50), (50, 50), (100, 50)]]
 	ai = AIgamer.LevelHandler()
-	ai.RemovePrevious(request.possible_positions, (0, 550), (patt[1], [(0, 500), (0, 550), (50, 550)]))
-	assert request.possible_positions == [(patt[1], [(0, 550), (50, 550)])]
+	request = AIgamer.Request([], patt, 0)
+	request.possible_positions = [(patt[0], []), (patt[1], []), (patt[2], [(0, 500), (0, 550), (50, 550)]), (patt[3], [(0, 550)])]
+	min, patts = ai.FindMinPatt(request)
+	assert min == 550
+	assert patts == [patt[2], patt[3]]
 
-'''
+
 def test_LevelHandler_Handle():
-	Check if request contains list with lowest positions
+	'''Check if the method chooses the lowest random position and
+	if saves it correctly'''
 
-	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
+	patt = [[(200, -100, 100), (0, 0), (0, 50), (50, 50), (0, 100)], [(200, -50, 150), (0, 0), (50, 0), (100, 0), (50, 50)],
+	[(200, -100, 100), (50, 0), (0, 50), (50, 50), (50, 100)], [(200, -50, 150), (50, 0), (0, 50), (50, 50), (100, 50)]]
 	ai = AIgamer.LevelHandler()
 	request = AIgamer.Request([], patt, 0)
-	request.possible_positions = [(patt[0], [(0, 450)]), (patt[1], [(0, 500), (0, 550), (50, 550)])]
-	ai.Handle
-	assert ret == [(patt[1], [(0, 700)])]
-	'''
+	request.possible_positions = [(patt[0], []), (patt[1], []), (patt[2], [(0, 500), (0, 550), (50, 550)]), (patt[3], [(0, 550)])]
+	ai.Handle(request)
+
+	assert request.final_position[0] in [patt[2], patt[3]]
+	assert request.final_position[1] in [(0, 550), (50, 550)]
