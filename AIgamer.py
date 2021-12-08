@@ -95,10 +95,8 @@ class PosPlaceHandler(BaseHandler):
 	'''Find best place for current falling shape'''
 
 
-
 	def __init__(self):
 		pass
-
 
 
 	def Handle(self, request: object):
@@ -172,95 +170,57 @@ class RowsHandler(BaseHandler):
 
 	def Handle(self, request: object):
 		'''Check the possibility of removing rows. If no possibility, possible_positions list
-		remains unchanged. Otherwise the list is being updated and contains positionings
-		allowing removing rows'''
+		remains unchanged. Otherwise the list containing positions allowing removing rows
+		is being updated'''
 		
 		positions_removing_rows = self.FindPossibilities(request)
+		length = len(positions_removing_rows)
 
-		max = 1
-		positions = []
-		for shape in positions_removing_rows:
-			if len(shape[1]) == 0:
-				positions_removing_rows.remove(shape)
-			else:
-				app_in_shape = []
-				for pos in shape[1]:
-					if pos[2] == max:
-						app = (pos[0], pos[1])
-						app_in_shape.append(app)
-				if len(app_in_shape) > 0:
-					app = (shape[0], app_in_shape)
-					positions.append(app)
-
-
-		counter = 0
-		for shape in positions_removing_rows:
-			if len(shape[1]) != 0:
-				counter += len(shape[1])
-
-		if counter == 1:
-			pass			#end the chain
-		elif counter > 1:
-			request.possible_positions = positions_removing_rows 
+		if length > 1:
+			request.possible_positions = positions_removing_rows
+		elif length == 1:
+			if len(positions_removing_rows[0][1]) > 1:
+				request.possible_positions = positions_removing_rows
+			elif len(positions_removing_rows[0][1]) == 1:
+				request.final_position = positions_removing_rows[0]
 
 		
 	def FindPossibilities(self, request: object):
-		'''The algorithm of finding positions allowing removing shapes'''
-
-		rows, row_y_coordinates = self.CountObjsRows(request)
-		positions_removing_rows = [(shape[0], []) for shape in request.possible_positions]
-		rows_copy = rows.copy()
+		'''Create list with positions, that allow removing the highest number of rows'''
 
 		max = 1
+		positions_removing_rows = []
 		for shape in request.possible_positions:
-			
-			can_remove_row = False
-			for shape_pos in shape[1]:	
-				counter = 0			
-				objs_positions = [shape_pos[1] + shape[0][i][1] for i in range(1, 5)]
-				
-				for pos in objs_positions:
-					rows_copy[row_y_coordinates.index(pos)] += 1
-					if rows_copy[row_y_coordinates.index(pos)] == 10:
-						counter += 1
-						can_remove_row = True
-				
-				rows_copy = rows.copy()
+			positions = []
+			for shape_pos in shape[1]:			
+				counter = self.CountRowsSupposition(request, shape[0], shape_pos)			
 				if counter == max:
-					for shape1 in positions_removing_rows:
-						if shape1[0] == shape[0]:
-							shape1[1].append(shape_pos)
-
+					positions.append(shape_pos)
 				elif counter > max:
-					max = counter					
-					index = 0
-					for shape1 in positions_removing_rows:
-						if shape1[0] != shape[0]:
-							index += 1
-						elif shape1[0] == shape[0]:
-							break
-					for i in range(index):
-						positions_removing_rows.remove(positions_removing_rows[0])
-					positions_removing_rows[0][1] = [shape_pos]
-
-			if not can_remove_row:										
-				for shape1 in positions_removing_rows:
-					if shape1[0] == shape[0]:
-						positions_removing_rows.remove(shape1)
+					positions.clear()
+					positions.append(shape_pos)
+			
+			if len(positions) > 0:
+				positions_removing_rows.append((shape[0], positions))
 
 		return positions_removing_rows
 
-		
-	def CountObjsRows(self, request: object) -> list:
-		'''Count in rows objs from obj_lst'''
 
-		rows = [0 for n in range(15)] 
-		row_y_coordinates = [700 - n * 50 for n in range(15)]
+	def CountRowsSupposition(self, request, patt, shape_pos):
+		'''Count how many there would be objects in rows if shape was placed
+		in shape_pos position'''
 
-		for obj in request.obj_lst[:-4]:
-			rows[row_y_coordinates.index(obj.y)] += 1
+		rows, row_y_coordinates = self.CountObjsRows(request)
+		rows_copy = rows.copy()
+		objs_positions = [shape_pos[1] + patt[i][1] for i in range(1, 5)]
 
-		return rows, row_y_coordinates
+		counter = 0
+		for pos in objs_positions:
+			rows_copy[row_y_coordinates.index(pos)] += 1
+			if rows_copy[row_y_coordinates.index(pos)] == 10:
+				counter += 1		
+
+		return counter
 
 
 

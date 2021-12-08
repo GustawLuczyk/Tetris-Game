@@ -58,30 +58,45 @@ def test_PosPos_Handle():
 
 
 def test_RowsHandler_CountObjsRows():
-	'''Check if the method properly counts number of objects in obj_lst[:-4]'''
+	'''Check if the method properly counts number of objects in obj_lst[:-4] 
+	(exclude shapes objects)'''
 
-	obj_lst = [model.Brick(i * 50, 700, (0,0,0)) for i in range(10)]
-	obj_lst.insert(0, model.Brick(0, 600, (0,0,0)))
+	obj_lst = [model.Brick(50 + i * 50, 700, (0,0,0)) for i in range(9)] 
+	obj_lst.extend([model.Brick(50 + i * 50, 650, (0,0,0)) for i in range(9)])
+	obj_lst.extend([model.Brick(200 + i * 50, 600, (0,0,0)) for i in range(10)])
 	ai = AIgamer.RowsHandler()
 	request = AIgamer.Request(obj_lst, [], 0)
 	rows, y_coor = ai.CountObjsRows(request)
 	row_y_coordinates = [700 - n * 50 for n in range(15)]
-	assert rows == [6, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	assert rows == [9, 9, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	assert y_coor == row_y_coordinates
+
+
+def test_RowsHandler_CountRowsSupposition():
+	'''Check if the method correctly counts number of rows that could be removed'''
+
+	obj_lst = [model.Brick(50 + i * 50, 700, (0,0,0)) for i in range(9)] 
+	obj_lst.extend([model.Brick(50 + i * 50, 650, (0,0,0)) for i in range(9)])
+	obj_lst.extend([model.Brick(200 + i * 50, 600, (0,0,0)) for i in range(10)])
+	patt = [(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)]
+	ai = AIgamer.RowsHandler()
+	request = AIgamer.Request(obj_lst, [], 0)
+	counter = ai.CountRowsSupposition(request, patt, (0, 550))
+	assert counter == 2
 
 
 def test_RowsHandler_FindPossibilities():
 	'''Check if the method FindPossibilities returns correctly modified list'''
 
 	obj_lst = [model.Brick(50 + i * 50, 700, (0,0,0)) for i in range(9)] 
-	obj_lst.append([model.Brick(50 + i * 50, 650, (0,0,0)) for i in range(9)])
-	obj_lst.append([model.Brick(200 + i * 50, 700, (0,0,0)) for i in range(10)])
+	obj_lst.extend([model.Brick(50 + i * 50, 650, (0,0,0)) for i in range(9)])
+	obj_lst.extend([model.Brick(200 + i * 50, 700, (0,0,0)) for i in range(10)])
 	patt = [[(200, -150, 50), (0, 0), (0, 50), (0, 100), (0, 150)], [(200, 0, 200), (0, 0), (50, 0), (100, 0), (150, 0)]]
 	ai = AIgamer.RowsHandler()
 	request = AIgamer.Request(obj_lst, patt, 0)
-	request.possible_positions = [(patt[1], [(0, 550), (300, 500)]), (patt[0], [(50, 400), (0, 500), (450, 350)])]
-	ret = ai.FindPossibilities(request)
-	assert ret == [(patt[0], [(0, 500)])]
+	request.possible_positions = [(patt[0], [(50, 400), (0, 550), (450, 350)]), (patt[1], [(0, 550), (300, 500)])]
+	ret = ai.handle(request)
+	assert ret == [(patt[0], [(0, 550)])]
 
 
 def test_LevelHandler_FindMinPatt():
